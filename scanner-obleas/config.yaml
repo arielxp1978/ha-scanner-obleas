@@ -20,4 +20,4 @@ schema:
   nombre: str
 
 host_network: false
-image: "ghcr.io/arielxp/ha-scanner-obleas/{arch}-scanner-obleas"
+image: "ghcr.io/arielxp1978/ha-scanner-obleas/{arch}-scanner-obleas"
