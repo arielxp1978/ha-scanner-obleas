@@ -1,0 +1,23 @@
+name: "Scanner Obleas GNC"
+description: "Contribuí al monitoreo del mercado GNC de Argentina. Tu Raspberry escanea obleas en segundo plano."
+version: "1.0.0"
+slug: "scanner_obleas"
+init: false
+
+arch:
+  - aarch64
+  - armv7
+  - armhf
+  - amd64
+
+startup: application
+boot: auto
+
+options:
+  nombre: "mi_rpi"
+
+schema:
+  nombre: str
+
+host_network: false
+image: "ghcr.io/arielxp/ha-scanner-obleas/{arch}-scanner-obleas"
