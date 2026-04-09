@@ -17,20 +17,26 @@ if [ ! -d "$DEPS_DIR/psycopg2" ]; then
     bashio::log.info "Dependencias instaladas."
 fi
 
-# Descargar última versión del scanner desde VPS
-bashio::log.info "Descargando scanner desde servidor central..."
-curl -sL "$VPS_URL/scanner_rpi.py" -o "$SCANNER.new" 2>/dev/null
-if [ -s "$SCANNER.new" ]; then
-    mv "$SCANNER.new" "$SCANNER"
-    bashio::log.info "Scanner actualizado OK."
-else
-    bashio::log.warning "No se pudo descargar el scanner. Usando versión anterior si existe."
-    rm -f "$SCANNER.new"
-fi
+# Función para descargar la última versión del scanner
+actualizar_scanner() {
+    curl -sL --connect-timeout 15 "$VPS_URL/scanner_rpi.py" -o "$SCANNER.new" 2>/dev/null
+    if [ -s "$SCANNER.new" ] && python3 -c "import ast; ast.parse(open('$SCANNER.new').read())" 2>/dev/null; then
+        mv "$SCANNER.new" "$SCANNER"
+        bashio::log.info "Scanner actualizado OK."
+    else
+        rm -f "$SCANNER.new"
+        bashio::log.warning "No se pudo descargar el scanner. Usando versión anterior."
+    fi
+}
+
+# Descarga inicial
+actualizar_scanner
 
 if [ ! -f "$SCANNER" ]; then
-    bashio::log.error "No hay scanner disponible. Abortando."
-    exit 1
+    bashio::log.error "No hay scanner disponible. Reintentando en 60s..."
+    sleep 60
+    actualizar_scanner
+    [ ! -f "$SCANNER" ] && exit 1
 fi
 
 cd "$DATA_DIR"
@@ -39,13 +45,21 @@ RONDA=1
 bashio::log.info "Iniciando escaneo continuo..."
 
 while true; do
-    bashio::log.info "--- Ronda $RONDA: sentinel (150 obleas) ---"
-    PYTHONPATH="$DEPS_DIR" python3 "$SCANNER" --node-id "${NOMBRE}_s" --count 150
+    # Actualizar scanner cada 10 rondas
+    if [ $((RONDA % 10)) -eq 0 ]; then
+        bashio::log.info "Verificando actualización del scanner..."
+        actualizar_scanner
+    fi
 
     bashio::log.info "--- Ronda $RONDA: helper (300 obleas) ---"
-    PYTHONPATH="$DEPS_DIR" python3 "$SCANNER" --node-id "$NOMBRE" --count 300
+    PYTHONPATH="$DEPS_DIR" python3 "$SCANNER" --node-id "$NOMBRE" --count 300 || \
+        bashio::log.warning "Helper terminó con error. Continuando..."
 
-    bashio::log.info "Ronda $RONDA completada. Pausa 60s..."
+    bashio::log.info "--- Ronda $RONDA: sentinel (150 obleas) ---"
+    PYTHONPATH="$DEPS_DIR" python3 "$SCANNER" --node-id "${NOMBRE}_sentinel" --count 150 || \
+        bashio::log.warning "Sentinel terminó con error. Continuando..."
+
+    bashio::log.info "Ronda $RONDA completada. Pausa 30s..."
     RONDA=$((RONDA+1))
-    sleep 60
+    sleep 30
 done
