@@ -1,13 +1,13 @@
 name: "Scanner Obleas GNC"
 description: "Contribuí al monitoreo del mercado GNC de Argentina. Tu Raspberry escanea obleas en segundo plano."
-version: "1.0.0"
+version: "1.0.1"
 slug: "scanner_obleas"
+url: "https://github.com/arielxp1978/ha-scanner-obleas"
 init: false
 
 arch:
   - aarch64
   - armv7
-  - armhf
   - amd64
 
 startup: application
