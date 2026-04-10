@@ -44,6 +44,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get version from config
+        id: version
+        run: echo "version=$(grep '^version:' scanner-obleas/config.yaml | awk '{print $2}' | tr -d '\"')" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -51,4 +55,6 @@ jobs:
           platforms: ${{ matrix.platform }}
           push: true
           build-args: BUILD_FROM=${{ matrix.base }}
-          tags: ghcr.io/arielxp1978/ha-scanner-obleas/${{ matrix.arch }}-scanner-obleas:latest
+          tags: |
+            ghcr.io/arielxp1978/ha-scanner-obleas/${{ matrix.arch }}-scanner-obleas:latest
+            ghcr.io/arielxp1978/ha-scanner-obleas/${{ matrix.arch }}-scanner-obleas:${{ steps.version.outputs.version }}
