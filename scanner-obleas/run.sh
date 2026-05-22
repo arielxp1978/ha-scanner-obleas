@@ -55,10 +55,6 @@ while true; do
     PYTHONPATH="$DEPS_DIR" python3 "$SCANNER" --node-id "$NOMBRE" --count 300 || \
         bashio::log.warning "Helper terminó con error. Continuando..."
 
-    bashio::log.info "--- Ronda $RONDA: sentinel (150 obleas) ---"
-    PYTHONPATH="$DEPS_DIR" python3 "$SCANNER" --node-id "${NOMBRE}_sentinel" --count 150 || \
-        bashio::log.warning "Sentinel terminó con error. Continuando..."
-
     bashio::log.info "Ronda $RONDA completada. Pausa 30s..."
     RONDA=$((RONDA+1))
     sleep 30

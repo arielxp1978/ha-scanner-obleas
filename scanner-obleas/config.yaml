@@ -1,6 +1,6 @@
 name: "Scanner Obleas GNC"
 description: "Contribuí al monitoreo del mercado GNC de Argentina. Tu Raspberry escanea obleas en segundo plano."
-version: "1.0.1"
+version: "1.0.2"
 slug: "scanner_obleas"
 url: "https://github.com/arielxp1978/ha-scanner-obleas"
 init: false
@@ -17,7 +17,7 @@ options:
   nombre: "mi_rpi"
 
 schema:
-  nombre: str
+  nombre: match(^[a-z0-9_]{2,30}$)
 
 host_network: false
 image: "ghcr.io/arielxp1978/ha-scanner-obleas/{arch}-scanner-obleas"
